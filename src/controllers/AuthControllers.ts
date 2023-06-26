@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { compare, encrypt } from '../utils/hash';
 import { badRequest, serverError, statusOkay, unauthAccess } from '../views/view';
-import { stat } from 'fs';
 config();
 
 
