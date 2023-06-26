@@ -3,6 +3,8 @@ import { config } from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { loginUsersController, registerUsersController } from './controllers/AuthControllers';
+import { authMiddleWare } from './middleware/authMiddleware';
+import { getGrievancesController, postGrievancesController } from './controllers/GrievancesControllers';
 
 
 config();
@@ -13,7 +15,9 @@ app.use(cors());
 app.post('/register', registerUsersController);
 app.post('/login', loginUsersController);
 
-// app.use(middle)
+app.use(authMiddleWare);
+app.get('/grievances/:regno', getGrievancesController);
+app.post('/grievances', postGrievancesController);
 
 mongoose.connect(process.env.MONGO_URL!).then(() => {
     console.log(`Connected to MongoDB and Listening on Port ${process.env.PORT}`);
