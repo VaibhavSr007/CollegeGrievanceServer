@@ -36,12 +36,11 @@ export async function loginUsersController(req: Request, res: Response) {
             unauthAccess(res);
             return;
         }
-        const accessToken = jwt.sign({ regNo }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const accessToken = jwt.sign({ regNo }, (process.env.SECRET_KEY as string), {expiresIn: '1min'});
         const refreshToken = jwt.sign({ regNo }, (process.env.SECRET_KEY as string), {expiresIn: '90d'})
         statusOkay(res, { accessToken, refreshToken });
     }
-     catch {
-        res.status(500).json({message: "Error"});
+     catch(err) {
+        serverError(res, err);
     }
-    
 }
