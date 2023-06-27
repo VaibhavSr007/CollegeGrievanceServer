@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.post('/accesstoken', issueToken);
+app.get('/accesstoken', issueToken);
 app.post('/register', registerUsersController);
 app.post('/login', loginUsersController);
 

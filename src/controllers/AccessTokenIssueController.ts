@@ -23,7 +23,7 @@ export async function issueToken(req: Request, res: Response) {
             return;
         }
         const decodedjwt = (jwt.verify(refreshJWTToken, (process.env.SECRET_KEY as string)) as jwtPayload);
-        if (!decodedjwt.regNo || !decodedjwt.isAccessToken){
+        if (!decodedjwt.regNo || decodedjwt.isAccessToken){
             unauthAccess(res);
             return;    
         }
