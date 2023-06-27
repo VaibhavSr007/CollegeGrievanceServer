@@ -1,9 +1,9 @@
 import {Request, Response} from 'express';
-import UsersModel from '../models/Users';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { compare, encrypt } from '../utils/hash';
 import { badRequest, serverError, statusOkay, unauthAccess } from '../views/view';
+import UsersModel from '../models/Users';
 config();
 
 
@@ -36,8 +36,9 @@ export async function loginUsersController(req: Request, res: Response) {
             unauthAccess(res);
             return;
         }
-        const accessToken = jwt.sign({ regNo }, (process.env.SECRET_KEY as string), {expiresIn: '1min'});
-        const refreshToken = jwt.sign({ regNo }, (process.env.SECRET_KEY as string), {expiresIn: '90d'})
+        const { name, year, email } = regData;
+        const accessToken = jwt.sign({ name, year, email, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '60s'});
+        const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '90d'})
         statusOkay(res, { accessToken, refreshToken });
     }
      catch(err) {
