@@ -1,8 +1,14 @@
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
-import { unauthAccess } from '../views/view';
+import { statusOkay, unauthAccess } from '../views/view';
+import UsersModel from '../models/Users';
 config();
+
+interface jwtPayload {
+    regNo: string | null,
+    isAccessToken: boolean | null
+}
 
 export async function issueToken(req: Request, res: Response) {
     try {
@@ -11,19 +17,26 @@ export async function issueToken(req: Request, res: Response) {
             unauthAccess(res);
             return;
         }
-        const refreshToken = refreshTokenHeader.split(' ')[1];
-        if (!refreshToken) {
+        const refreshJWTToken = refreshTokenHeader.split(' ')[1];
+        if (!refreshJWTToken) {
             unauthAccess(res);
             return;
         }
-        const decodedjwt = jwt.verify(refreshToken, (process.env.SECRET_KEY as string));
-        
-
-
+        const decodedjwt = (jwt.verify(refreshJWTToken, (process.env.SECRET_KEY as string)) as jwtPayload);
+        if (!decodedjwt.regNo || !decodedjwt.isAccessToken){
+            unauthAccess(res);
+            return;    
+        }
+        const regData = await UsersModel.findOne({regNo: decodedjwt.regNo});
+        if (!regData) {
+            unauthAccess(res);
+            return;
+        }
+        const { name, year, regNo, email } = regData;
+        const accessToken = jwt.sign({ name, year, email, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '60s'});
+        const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
+        statusOkay(res, { accessToken, refreshToken })
     } catch(err) {
         unauthAccess(res);
     }
-    const { email, password } = req.body;
-    const token = jwt.sign({ email, password }, process.env.TOKEN_SECRET!, { expiresIn: '1h' });
-    res.json(token);
 }

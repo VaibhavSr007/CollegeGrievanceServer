@@ -38,7 +38,7 @@ export async function loginUsersController(req: Request, res: Response) {
         }
         const { name, year, email } = regData;
         const accessToken = jwt.sign({ name, year, email, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '60s'});
-        const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '90d'})
+        const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
         statusOkay(res, { accessToken, refreshToken });
     }
      catch(err) {
