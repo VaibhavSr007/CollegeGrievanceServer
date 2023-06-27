@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { loginUsersController, registerUsersController } from './controllers/AuthControllers';
-import { authMiddleWare } from './middleware/authMiddleware';
+import { authMiddleWare } from './middleware/AuthMiddleware';
 import { getGrievancesController, postGrievancesController } from './controllers/GrievancesControllers';
 import { issueToken } from './controllers/AccessTokenIssueController';
 
