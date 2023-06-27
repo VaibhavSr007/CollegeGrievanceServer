@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { loginUsersController, registerUsersController } from './controllers/AuthControllers';
 import { authMiddleWare } from './middleware/authMiddleware';
 import { getGrievancesController, postGrievancesController } from './controllers/GrievancesControllers';
+import { issueToken } from './controllers/AccessTokenIssueController';
 
 
 config();
@@ -12,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.post('/accesstoken')
+app.post('/accesstoken', issueToken);
 app.post('/register', registerUsersController);
 app.post('/login', loginUsersController);
 
