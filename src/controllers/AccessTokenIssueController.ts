@@ -33,7 +33,7 @@ export async function issueToken(req: Request, res: Response) {
             return;
         }
         const { name, year, regNo, email } = regData;
-        const accessToken = jwt.sign({ name, email, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '60s'});
+        const accessToken = jwt.sign({ name, email, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
         statusOkay(res, { accessToken, refreshToken, name, year, email, regNo })
     } catch(err) {
