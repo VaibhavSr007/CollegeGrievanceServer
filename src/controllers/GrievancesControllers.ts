@@ -19,7 +19,7 @@ export async function getGrievancesController(req: Request, res: Response) {
 export async function postGrievancesController(req: Request, res: Response) {
     try {
         const { regNo, subject, complaint, relatedDepts } = req.body;
-        if (!regNo || !subject || !complaint || !relatedDepts) {
+        if (!subject || !complaint || !relatedDepts) {
             badRequest(res);
             return;
         }
