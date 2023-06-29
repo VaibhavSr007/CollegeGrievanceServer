@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { compare, encrypt } from '../utils/hash';
-import { badRequest, serverError, statusOkay, unauthAccess } from '../views/view';
+import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } from '../views/view';
 import UsersModel from '../models/Users';
 config();
 
@@ -16,8 +16,8 @@ export async function registerUsersController(req: Request, res: Response) {
         }
         req.body.pass = await encrypt(req.body.pass);
         const newUser = new UsersModel(req.body);
-        const addUser = await newUser.save();
-        statusOkay(res, addUser);
+        await newUser.save();
+        statusOkay(res, {message: "User Added Successfully"});
     } catch(err) {
         serverError(res, err);
     }
@@ -33,7 +33,7 @@ export async function loginUsersController(req: Request, res: Response) {
         }
         const regData = await UsersModel.findOne({regNo: regNo});
         if (!regData || !await compare(pass, regData.pass!)) {
-            unauthAccess(res);
+            wrongCredentials(res);
             return;
         }
         const { name, year, email } = regData;
@@ -42,6 +42,31 @@ export async function loginUsersController(req: Request, res: Response) {
         statusOkay(res, { accessToken, refreshToken, name, year, email, regNo });
     }
      catch(err) {
+        serverError(res, err);
+    }
+}
+
+
+export async function changePasswordController(req: Request, res: Response) {
+    try {
+        const { regNo, pass, newPass } = req.body;
+        if (!regNo || !pass || !newPass) {
+            badRequest(res);
+            return;
+        }
+        const regData = await UsersModel.findOne({regNo: regNo});
+        if (!regData || !regData.pass){
+            serverError(res, { message: "User Not Found" });
+            return;
+        }
+        if (!await compare(pass, regData.pass)) {
+            wrongCredentials(res);
+            return;
+        }
+        regData.pass = await encrypt(newPass);
+        await regData.save();
+        statusOkay(res, {message: "Password Updated Successfully"});
+    } catch(err) {
         serverError(res, err);
     }
 }

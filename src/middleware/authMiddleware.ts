@@ -7,7 +7,7 @@ interface jwtPayload {
     isAccessToken: boolean | null
 }
 
-export function authMiddleWare(req: Request, res: Response, next: NextFunction) {
+export function AuthMiddleWare(req: Request, res: Response, next: NextFunction) {
     try {
         const authrisationToken = req.headers.authorization;
         if (!authrisationToken) {

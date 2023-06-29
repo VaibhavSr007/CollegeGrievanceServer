@@ -3,8 +3,8 @@ import { config } from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { Request, Response } from 'express';
-import { loginUsersController, registerUsersController } from './controllers/AuthControllers';
-import { authMiddleWare } from './middleware/AuthMiddleware';
+import { changePasswordController, loginUsersController, registerUsersController } from './controllers/AuthControllers';
+import { AuthMiddleWare } from './middleware/AuthMiddleware';
 import { getGrievancesController, postGrievancesController } from './controllers/GrievancesControllers';
 import { issueToken } from './controllers/AccessTokenIssueController';
 import { statusOkay } from './views/view';
@@ -20,9 +20,10 @@ app.post('/register', registerUsersController);
 app.post('/login', loginUsersController);
 app.get('/ping', (req: Request, res: Response) => statusOkay(res, {message: "Server Running"}));
 
-app.use(authMiddleWare);
+app.use(AuthMiddleWare);
 app.get('/grievances/:regno', getGrievancesController);
 app.post('/grievances', postGrievancesController);
+app.post('/change-password', changePasswordController);
 
 mongoose.connect(process.env.MONGO_URL!).then(() => {
     console.clear();
