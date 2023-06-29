@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { compare, encrypt } from '../utils/hash';
-import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } from '../views/view';
+import { badRequest, serverError, statusOkay, wrongCredentials } from '../views/view';
 import UsersModel from '../models/Users';
 config();
 
