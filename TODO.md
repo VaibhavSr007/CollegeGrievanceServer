@@ -4,7 +4,6 @@ Tables:
     - Reg No
     - Email
     - Pass
-    - isAdmin
 
 2. Grievances (User)
     - Reg No
@@ -12,3 +11,10 @@ Tables:
     - Content
     - Related Dept
     - Status
+
+3. Admin (Admin)
+    - Emp No
+    - Dept
+    - Name
+    - Email
+    - Pass
