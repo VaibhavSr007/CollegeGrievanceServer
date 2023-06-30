@@ -3,7 +3,8 @@ import { unauthAccess } from '../views/view';
 import jwt from 'jsonwebtoken';
 
 interface jwtPayload {
-    regNo: string | null,
+    regNo: string | null | undefined,
+    empNo: string | null | undefined,
     isAccessToken: boolean | null
 }
 
