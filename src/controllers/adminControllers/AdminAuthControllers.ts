@@ -1,10 +1,17 @@
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
-import { compare, encrypt } from '../utils/hash';
-import { badRequest, serverError, statusOkay, wrongCredentials } from '../views/view';
-import AdminModel from '../models/Admins';
+import { compare, encrypt } from '../../utils/hash';
+import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } from '../../views/view';
+import AdminModel from '../../models/Admins';
 config();
+
+interface decodedTokenType {
+    name: string,
+    dept: number,
+    email: string,
+    empNo: string,
+}
 
 
 export async function registerAdminController(req: Request, res: Response) {
@@ -37,12 +44,29 @@ export async function loginAdminController(req: Request, res: Response) {
             return;
         }
         const { name, dept, email, isSuperUser } = empData;
-        const accessToken = jwt.sign({ name, email, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const accessToken = jwt.sign({ name, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         const refreshToken = jwt.sign({ empNo, isSuperUser, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
         statusOkay(res, { accessToken, refreshToken, name, dept, email, empNo, isSuperUser });
     }
      catch(err) {
         serverError(res, err);
+    }
+}
+
+
+export async function issueAdminToken(req: Request, res: Response, decodedjwt: decodedTokenType) {
+    try {
+        const empData = await AdminModel.findOne({empNo: decodedjwt.empNo});
+        if (!empData) {
+            unauthAccess(res);
+            return;
+        }
+        const { name, dept, empNo, email, isSuperUser } = empData;
+        const accessToken = jwt.sign({ name, dept, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const refreshToken = jwt.sign({ empNo, isSuperUser, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
+        statusOkay(res, { accessToken, refreshToken, name, dept, email, empNo, isSuperUser })
+    } catch(err) {
+        unauthAccess(res);
     }
 }
 

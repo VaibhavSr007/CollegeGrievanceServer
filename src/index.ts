@@ -2,12 +2,11 @@ import express from 'express';
 import { config } from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import { Request, Response } from 'express';
-import { changePasswordController, loginUsersController, registerUsersController } from './controllers/UserAuthControllers';
+import { Response } from 'express';
 import { AuthMiddleWare } from './middleware/AuthMiddleware';
 import { getGrievancesController, postGrievancesController } from './controllers/GrievancesControllers';
-import { issueToken } from './controllers/AccessTokenIssueController';
 import { statusOkay } from './views/view';
+import { changePasswordController, issueToken, loginController, registerController } from './controllers/AuthControllers';
 
 
 config();
@@ -15,15 +14,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/ping', (req: Request, res: Response) => statusOkay(res, {message: "Server Running"}));
-
-// For normal users
+app.get('/ping', (_, res: Response) => statusOkay(res, {message: "Server Running"}));
 app.get('/accesstoken', issueToken);
-app.post('/register', registerUsersController);
-app.post('/login', loginUsersController);
-
-//  For Admins
-
+app.post('/login', loginController);
+app.post('/register', registerController);
 
 app.use(AuthMiddleWare);
 app.get('/grievances/:regno', getGrievancesController);
