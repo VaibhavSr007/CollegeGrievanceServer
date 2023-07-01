@@ -20,7 +20,7 @@ export async function getAdminGrievancesController(req: Request, res: Response) 
             const grievances = await GrievanceModel.find();
             statusOkay(res, grievances);
         } else {
-            const grievances = await GrievanceModel.find({ relatedDepts: { $in: [dept, name]} });
+            const grievances = await GrievanceModel.find({ relatedDepts: { $in: [dept, name, "any"]} });
             statusOkay(res, grievances);
         }
     } catch(err) {
