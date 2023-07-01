@@ -4,7 +4,7 @@ import { changeAdminPasswordController, issueAdminToken, loginAdminController, r
 import { changeUserPasswordController, issueUserToken, loginUserController, registerUserController } from './userControllers/UserAuthControllers';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
-import { statusOkay, unauthAccess } from '../views/view';
+import { unauthAccess } from '../views/view';
 config();
 
 
@@ -61,7 +61,8 @@ export async function issueToken(req: Request, res: Response) {
             unauthAccess(res);
             return;
         }
-        const refreshJWTToken = refreshTokenHeader.split(' ')[1];
+        const userNum = refreshTokenHeader.split(' ')[1];
+        const refreshJWTToken = refreshTokenHeader.split(' ')[2];
         if (!refreshJWTToken) {
             unauthAccess(res);
             return;
@@ -71,7 +72,11 @@ export async function issueToken(req: Request, res: Response) {
             unauthAccess(res);
             return;
         }
-        
+        if ((decodedjwt.regNo && decodedjwt.regNo !== userNum) || (decodedjwt.empNo && decodedjwt.empNo !== userNum)){
+            unauthAccess(res);
+            return;
+        }
+
         if (decodedjwt.regNo)
             issueUserToken(req, res, decodedjwt)
         else
@@ -80,6 +85,7 @@ export async function issueToken(req: Request, res: Response) {
         unauthAccess(res);
     }
 }
+
 
 export async function changePasswordController(req: Request, res: Response) {
     try {

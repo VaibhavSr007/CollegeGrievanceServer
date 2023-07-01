@@ -15,11 +15,16 @@ export function AuthMiddleWare(req: Request, res: Response, next: NextFunction) 
             unauthAccess(res);
             return;
         }
-        const jwtToken = authrisationToken.split(' ')[1];
+        const userNo = authrisationToken.split(' ')[1];
+        const jwtToken = authrisationToken.split(' ')[2];
         const decodedjwt = (jwt.verify(jwtToken, (process.env.SECRET_KEY as string)) as jwtPayload)
         if (!decodedjwt || !decodedjwt.isAccessToken) {
             unauthAccess(res);
             return;
+        }
+        if ((decodedjwt.regNo && decodedjwt.regNo !== userNo) || (decodedjwt.empNo && decodedjwt.empNo !== userNo)){
+            unauthAccess(res);
+            return;    
         }
         next();
     } catch (err) {

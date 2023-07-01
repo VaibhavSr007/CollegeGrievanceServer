@@ -4,9 +4,10 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { Response } from 'express';
 import { AuthMiddleWare } from './middleware/AuthMiddleware';
-import { getGrievancesController, postGrievancesController } from './controllers/GrievancesControllers';
+import { getGrievancesController } from './controllers/GrievancesControllers';
 import { statusOkay } from './views/view';
 import { changePasswordController, issueToken, loginController, registerController } from './controllers/AuthControllers';
+import { postUserGrievancesController } from './controllers/userControllers/UserGrievancesControllers';
 
 
 config();
@@ -20,8 +21,8 @@ app.post('/login', loginController);
 app.post('/register', registerController);
 
 app.use(AuthMiddleWare);
-app.get('/grievances/:regno', getGrievancesController);
-app.post('/grievances', postGrievancesController);
+app.get('/grievances/:no', getGrievancesController);
+app.post('/grievances', postUserGrievancesController);
 app.post('/change-password', changePasswordController);
 
 mongoose.connect(process.env.MONGO_URL!).then(() => {
