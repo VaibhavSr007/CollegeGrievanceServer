@@ -4,10 +4,6 @@ import { badRequest, statusOkay, serverError } from '../../views/view';
 
 export async function getUserGrievancesController(req: Request, res: Response) {
     try {
-        if (!req.params.no) {
-            badRequest(res);
-            return;
-        }
         const regNo = req.params.no.toUpperCase();
         const grievances = await GrievanceModel.find({ regNo: regNo });
         statusOkay(res, grievances);

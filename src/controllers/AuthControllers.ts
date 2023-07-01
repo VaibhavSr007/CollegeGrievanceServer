@@ -28,7 +28,7 @@ export async function registerController(req: Request, res: Response) {
         }
         if (regNo)
             registerUserController(req, res);
-        else
+        else if (empNo)
             registerAdminController(req, res);
     }
      catch(err) {
@@ -64,8 +64,8 @@ export async function loginController(req: Request, res: Response) {
         }
         if (regNo)
             loginUserController(req, res);
-        else
-        loginAdminController(req, res);
+        else if (empNo)
+            loginAdminController(req, res);
     } catch(err) {
         serverError(res, err);
     }
@@ -97,7 +97,7 @@ export async function issueToken(req: Request, res: Response) {
 
         if (decodedjwt.regNo)
             issueUserToken(req, res, decodedjwt)
-        else
+        else if (decodedjwt.empNo)
             issueAdminToken(req, res, decodedjwt)
     } catch(err) {
         unauthAccess(res);
