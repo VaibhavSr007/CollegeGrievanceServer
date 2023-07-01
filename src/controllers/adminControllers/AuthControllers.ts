@@ -50,7 +50,7 @@ export async function loginAdminController(req: Request, res: Response) {
             badRequest(res);
             return;
         }
-        const empData = await AdminModel.findOne({empNo: empNo}).select("name isSuperUser");
+        const empData = await AdminModel.findOne({empNo: empNo}).select("name pass isSuperUser");
         if (!empData || !await compare(pass, empData.pass!)) {
             wrongCredentials(res);
             return;
