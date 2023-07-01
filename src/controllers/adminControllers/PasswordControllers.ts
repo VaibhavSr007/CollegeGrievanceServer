@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { badRequest, serverError, statusOkay, wrongCredentials } from '../../views/view';
+import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } from '../../views/view';
 import { compare } from 'bcryptjs';
 import AdminModel from '../../models/Admins';
 import { encrypt } from '../../utils/hash';
+import { sendOTP } from '../../utils/sendOTP';
 
 
 export async function changeAdminPasswordController(req: Request, res: Response) {
@@ -27,4 +28,20 @@ export async function changeAdminPasswordController(req: Request, res: Response)
     } catch(err) {
         serverError(res, err);
     }
+}
+
+
+export async function sendAdminOTPController(req: Request, res: Response) {
+    const empNo = req.params.no;
+    const empData = await AdminModel.findOne({ empNo });
+    if (!empData) {
+        unauthAccess(res);
+        return;
+    }
+    const { email } = empData;
+    if (!email) {
+        unauthAccess(res);
+        return;
+    }
+    sendOTP(email);
 }
