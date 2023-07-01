@@ -10,12 +10,13 @@ export async function getAdminGrievancesController(req: Request, res: Response) 
             return;
         }
         const empNo = req.params.no.toUpperCase();
-        const empData = await AdminModel.find({ empNo: empNo });
+        const empData = await AdminModel.findOne({ empNo: empNo }).select("name dept");
         if (!empData) {
             unauthAccess(res);
             return;
         }
-        const grievances = await GrievanceModel.find({ empNo: empNo });
+        const { name, dept } = empData;
+        const grievances = await GrievanceModel.find({ relatedDepts: { $in: [dept, name]} });
         statusOkay(res, grievances);
     } catch(err) {
         serverError(res, err);
