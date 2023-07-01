@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { badRequest, serverError } from '../views/view';
-import { changeAdminPasswordController, issueAdminToken, loginAdminController, registerAdminController } from './adminControllers/AdminAuthControllers';
-import { changeUserPasswordController, issueUserToken, loginUserController, registerUserController } from './userControllers/UserAuthControllers';
+import { changeAdminPasswordController, deleteAdminController, issueAdminToken, loginAdminController, registerAdminController } from './adminControllers/AdminAuthControllers';
+import { changeUserPasswordController, deleteUserController, issueUserToken, loginUserController, registerUserController } from './userControllers/UserAuthControllers';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { unauthAccess } from '../views/view';
@@ -19,23 +19,6 @@ interface jwtPayload {
 }
 
 
-export async function loginController(req: Request, res: Response) {
-    try {
-        const { regNo, empNo } = req.body;
-        if (!regNo && !empNo) {
-            badRequest(res);
-            return;
-        }
-        if (regNo)
-            loginUserController(req, res);
-        else
-            loginAdminController(req, res);
-    } catch(err) {
-        serverError(res, err);
-    }
-}
-
-
 export async function registerController(req: Request, res: Response) {
     try {
         const { regNo, empNo } = req.body;
@@ -49,6 +32,41 @@ export async function registerController(req: Request, res: Response) {
             registerAdminController(req, res);
     }
      catch(err) {
+        serverError(res, err);
+    }
+}
+
+
+export async function deleteController(req: Request, res: Response) {
+    try {
+        const userNum = req.params.no;
+        if (!userNum) {
+            badRequest(res);
+            return;
+        }
+        if (userNum.toLowerCase() === userNum.toUpperCase())
+            deleteAdminController(req, res);
+        else
+            deleteUserController(req, res);
+    }
+     catch(err) {
+        serverError(res, err);
+    }
+}
+
+
+export async function loginController(req: Request, res: Response) {
+    try {
+        const { regNo, empNo } = req.body;
+        if (!regNo && !empNo) {
+            badRequest(res);
+            return;
+        }
+        if (regNo)
+            loginUserController(req, res);
+        else
+        loginAdminController(req, res);
+    } catch(err) {
         serverError(res, err);
     }
 }

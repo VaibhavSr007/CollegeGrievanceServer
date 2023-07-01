@@ -31,6 +31,21 @@ export async function registerUserController(req: Request, res: Response) {
 }
 
 
+export async function deleteUserController(req: Request, res: Response) {
+    try {
+        const regNo = req.params.no.toUpperCase();
+        if (!regNo) {
+            badRequest(res);
+            return;
+        }
+        await UserModel.deleteOne({regNo: regNo});
+        statusOkay(res, {message: "User Deleted Successfully"});
+    } catch(err) {
+        serverError(res, err);
+    }
+}
+
+
 export async function loginUserController(req: Request, res: Response) {
     try {
         const { regNo, pass } = req.body;
@@ -46,7 +61,7 @@ export async function loginUserController(req: Request, res: Response) {
         const { name, year, email } = regData;
         const accessToken = jwt.sign({ name, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
-        statusOkay(res, { accessToken, refreshToken, name, year, email, regNo });
+        statusOkay(res, { accessToken, refreshToken, name, regNo });
     }
      catch(err) {
         serverError(res, err);
@@ -64,7 +79,7 @@ export async function issueUserToken(req: Request, res: Response, decodedjwt: de
         const { name, year, regNo, email } = regData;
         const accessToken = jwt.sign({ name, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
-        statusOkay(res, { accessToken, refreshToken, name, year, email, regNo })  
+        statusOkay(res, { accessToken, refreshToken, name, regNo })  
     } catch(err) {
         unauthAccess(res);
     }

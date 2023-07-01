@@ -31,6 +31,21 @@ export async function registerAdminController(req: Request, res: Response) {
 }
 
 
+export async function deleteAdminController(req: Request, res: Response) {
+    try {
+        const empNo = req.params.no.toUpperCase();
+        if (!empNo) {
+            badRequest(res);
+            return;
+        }
+        await AdminModel.deleteOne({empNo: empNo});
+        statusOkay(res, {message: "Admin Deleted Successfully"});
+    } catch(err) {
+        serverError(res, err);
+    }
+}
+
+
 export async function loginAdminController(req: Request, res: Response) {
     try {
         const { empNo, pass } = req.body;
@@ -46,7 +61,7 @@ export async function loginAdminController(req: Request, res: Response) {
         const { name, dept, email, isSuperUser } = empData;
         const accessToken = jwt.sign({ name, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         const refreshToken = jwt.sign({ empNo, isSuperUser, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
-        statusOkay(res, { accessToken, refreshToken, name, dept, email, empNo, isSuperUser });
+        statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser });
     }
      catch(err) {
         serverError(res, err);
@@ -62,9 +77,9 @@ export async function issueAdminToken(req: Request, res: Response, decodedjwt: d
             return;
         }
         const { name, dept, empNo, email, isSuperUser } = empData;
-        const accessToken = jwt.sign({ name, dept, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const accessToken = jwt.sign({ name, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         const refreshToken = jwt.sign({ empNo, isSuperUser, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
-        statusOkay(res, { accessToken, refreshToken, name, dept, email, empNo, isSuperUser })
+        statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser })
     } catch(err) {
         unauthAccess(res);
     }

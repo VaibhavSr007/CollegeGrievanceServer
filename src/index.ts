@@ -6,7 +6,7 @@ import { Response } from 'express';
 import { AuthMiddleWare } from './middleware/AuthMiddleware';
 import { getGrievancesController } from './controllers/GrievancesControllers';
 import { statusOkay } from './views/view';
-import { changePasswordController, issueToken, loginController, registerController } from './controllers/AuthControllers';
+import { changePasswordController, deleteController, issueToken, loginController, registerController } from './controllers/AuthControllers';
 import { postUserGrievancesController } from './controllers/userControllers/UserGrievancesControllers';
 
 
@@ -23,6 +23,7 @@ app.post('/register', registerController);
 app.use(AuthMiddleWare);
 app.get('/grievances/:no', getGrievancesController);
 app.post('/grievances', postUserGrievancesController);
+app.delete('/grievances/:no', deleteController);
 app.post('/change-password', changePasswordController);
 
 mongoose.connect(process.env.MONGO_URL!).then(() => {
