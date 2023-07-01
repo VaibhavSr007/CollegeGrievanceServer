@@ -10,14 +10,19 @@ export async function getAdminGrievancesController(req: Request, res: Response) 
             return;
         }
         const empNo = req.params.no.toUpperCase();
-        const empData = await AdminModel.findOne({ empNo: empNo }).select("name dept");
+        const empData = await AdminModel.findOne({ empNo: empNo }).select("name dept isSuperUser");
         if (!empData) {
             unauthAccess(res);
             return;
         }
-        const { name, dept } = empData;
-        const grievances = await GrievanceModel.find({ relatedDepts: { $in: [dept, name]} });
-        statusOkay(res, grievances);
+        const { name, dept, isSuperUser } = empData;
+        if (isSuperUser) {
+            const grievances = await GrievanceModel.find();
+            statusOkay(res, grievances);
+        } else {
+            const grievances = await GrievanceModel.find({ relatedDepts: { $in: [dept, name]} });
+            statusOkay(res, grievances);
+        }
     } catch(err) {
         serverError(res, err);
     }
