@@ -6,6 +6,7 @@ import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } f
 import UserModel from '../../models/Users';
 config();
 
+
 interface decodedTokenType {
     name: string,
     year: number,
@@ -82,30 +83,5 @@ export async function issueUserToken(req: Request, res: Response, decodedjwt: de
         statusOkay(res, { accessToken, refreshToken, name, regNo })  
     } catch(err) {
         unauthAccess(res);
-    }
-}
-
-
-export async function changeUserPasswordController(req: Request, res: Response) {
-    try {
-        const { regNo, pass, newPass } = req.body;
-        if (!regNo || !pass || !newPass) {
-            badRequest(res);
-            return;
-        }
-        const regData = await UserModel.findOne({regNo: regNo});
-        if (!regData || !regData.pass){
-            serverError(res, { message: "User Not Found" });
-            return;
-        }
-        if (!await compare(pass, regData.pass)) {
-            wrongCredentials(res);
-            return;
-        }
-        regData.pass = await encrypt(newPass);
-        await regData.save();
-        statusOkay(res, {message: "Password Updated Successfully"});
-    } catch(err) {
-        serverError(res, err);
     }
 }

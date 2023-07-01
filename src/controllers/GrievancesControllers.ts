@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import { badRequest, serverError } from '../views/view';
-import { getUserGrievancesController } from './userControllers/UserGrievancesControllers';
-import { getAdminGrievancesController } from './adminControllers/AdminGrievancesControllers';
+import { getUserGrievancesController } from './userControllers/GrievancesControllers';
+import { getAdminGrievancesController } from './adminControllers/GrievancesControllers';
 
 export async function getGrievancesController(req: Request, res: Response) {
     try {

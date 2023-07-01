@@ -6,8 +6,9 @@ import { Response } from 'express';
 import { AuthMiddleWare } from './middleware/AuthMiddleware';
 import { getGrievancesController } from './controllers/GrievancesControllers';
 import { statusOkay } from './views/view';
-import { changePasswordController, deleteController, issueToken, loginController, registerController } from './controllers/AuthControllers';
-import { postUserGrievancesController } from './controllers/userControllers/UserGrievancesControllers';
+import { deleteController, issueToken, loginController, registerController } from './controllers/AuthControllers';
+import { postUserGrievancesController } from './controllers/userControllers/GrievancesControllers';
+import { changePasswordController } from './controllers/PasswordControllers';
 
 
 config();

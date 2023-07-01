@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { badRequest, serverError } from '../views/view';
-import { changeAdminPasswordController, deleteAdminController, issueAdminToken, loginAdminController, registerAdminController } from './adminControllers/AdminAuthControllers';
-import { changeUserPasswordController, deleteUserController, issueUserToken, loginUserController, registerUserController } from './userControllers/UserAuthControllers';
+import { deleteAdminController, issueAdminToken, loginAdminController, registerAdminController } from './adminControllers/AuthControllers';
+import { deleteUserController, issueUserToken, loginUserController, registerUserController } from './userControllers/AuthControllers';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { unauthAccess } from '../views/view';
@@ -101,23 +101,5 @@ export async function issueToken(req: Request, res: Response) {
             issueAdminToken(req, res, decodedjwt)
     } catch(err) {
         unauthAccess(res);
-    }
-}
-
-
-export async function changePasswordController(req: Request, res: Response) {
-    try {
-        const { regNo, empNo } = req.body;
-        if (!regNo && !empNo) {
-            badRequest(res);
-            return;
-        }
-        if (regNo)
-            changeUserPasswordController(req, res);
-        else
-            changeAdminPasswordController(req, res);
-    }
-     catch(err) {
-        serverError(res, err);
     }
 }

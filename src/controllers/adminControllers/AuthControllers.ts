@@ -6,6 +6,7 @@ import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } f
 import AdminModel from '../../models/Admins';
 config();
 
+
 interface decodedTokenType {
     name: string,
     dept: number,
@@ -82,30 +83,5 @@ export async function issueAdminToken(req: Request, res: Response, decodedjwt: d
         statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser })
     } catch(err) {
         unauthAccess(res);
-    }
-}
-
-
-export async function changeAdminPasswordController(req: Request, res: Response) {
-    try {
-        const { empNo, pass, newPass } = req.body;
-        if (!empNo || !pass || !newPass) {
-            badRequest(res);
-            return;
-        }
-        const empData = await AdminModel.findOne({empNo: empNo});
-        if (!empData || !empData.pass){
-            serverError(res, { message: "Admin Not Found" });
-            return;
-        }
-        if (!await compare(pass, empData.pass)) {
-            wrongCredentials(res);
-            return;
-        }
-        empData.pass = await encrypt(newPass);
-        await empData.save();
-        statusOkay(res, {message: "Password Updated Successfully"});
-    } catch(err) {
-        serverError(res, err);
     }
 }
