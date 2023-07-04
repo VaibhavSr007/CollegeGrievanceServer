@@ -3,29 +3,29 @@ import nodeMailer from 'nodemailer';
 config();
 
 const transporter = nodeMailer.createTransport({
-    service: 'gmail',
+    host: 'us2.smtp.mailhostbox.com',
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL,
         pass: process.env.PASSWORD
     }
 });
 
-export function sendOTP(email: string) {
+export default async function sendOTP(email: string) {
     const otp = Math.floor(100000 + Math.random() * 900000);
-
+    console.log(process.env.EMAIL, email);
     const mailOptions = {
-        from: process.env.EMAIL,
+        from: process.env.EMAIL,    
         to: email,
         subject: 'OTP for login',
         text: `Your OTP is ${otp}`
     }
 
-    console.log("OTP:", otp);
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error("Error: ", error);
-        } else {
-            console.log("Email Sent");
-        }
-    })
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.log(error);
+    }
+    return otp;
 }

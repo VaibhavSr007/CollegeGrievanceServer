@@ -2,8 +2,8 @@ import { compare } from 'bcryptjs';
 import { Request, Response } from 'express';
 import UserModel from '../../models/Users';
 import { encrypt } from '../../utils/hash';
-import { badRequest, serverError, wrongCredentials, statusOkay, unauthAccess } from '../../views/view';
-import { sendOTP } from '../../utils/sendOTP';
+import { badRequest, serverError, wrongCredentials, statusOkay, notFound } from '../../views/view';
+import sendOTP from '../../utils/sendOTP';
 
 
 export async function changeUserPasswordController(req: Request, res: Response) {
@@ -32,16 +32,21 @@ export async function changeUserPasswordController(req: Request, res: Response) 
 
 
 export async function sendUserOTPController(req: Request, res: Response) {
-    const regNo = req.params.no;
-    const regData = await UserModel.findOne({ regNo });
-    if (!regData) {
-        unauthAccess(res);
-        return;
+    try {
+        const regNo = req.params.no;
+        const regData = await UserModel.findOne({ regNo });
+        if (!regData) {
+            notFound(res);
+            return;
+        }
+        const { email } = regData;
+        if (!email) {
+            notFound(res);
+            return;
+        }
+        const otp = await sendOTP(email);
+        statusOkay(res, { otp });
+    } catch(err) {
+        serverError(res, err);
     }
-    const { email } = regData;
-    if (!email) {
-        unauthAccess(res);
-        return;
-    }
-    sendOTP(email);
 }

@@ -7,14 +7,6 @@ import UserModel from '../../models/Users';
 config();
 
 
-interface decodedTokenType {
-    name: string,
-    year: number,
-    email: string,
-    regNo: string,
-}
-
-
 export async function registerUserController(req: Request, res: Response) {
     try {
         const { name, year, email, pass } = req.body;
@@ -50,14 +42,14 @@ export async function loginUserController(req: Request, res: Response) {
             badRequest(res);
             return;
         }
-        const regData = await UserModel.findOne({regNo: regNo}).select("name pass");
+        const regData = await UserModel.findOne({regNo: regNo}).select("_id name pass");
         if (!regData || !await compare(pass, regData.pass!)) {
             wrongCredentials(res);
             return;
         }
-        const { name } = regData;
-        const accessToken = jwt.sign({ name, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
-        const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
+        const { _id, name } = regData;
+        const accessToken = jwt.sign({ _id, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const refreshToken = jwt.sign({ _id, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
         statusOkay(res, { accessToken, refreshToken, name, regNo });
     }
      catch(err) {
@@ -66,16 +58,17 @@ export async function loginUserController(req: Request, res: Response) {
 }
 
 
-export async function issueUserToken(req: Request, res: Response, decodedjwt: decodedTokenType) {
+export async function issueUserToken(req: Request, res: Response) {
     try {
-        const regData = await UserModel.findOne({regNo: decodedjwt.regNo});
+        const _id = res.locals._id;
+        const accessToken = res.locals.accessToken;
+        const refreshToken = res.locals.refreshToken;
+        const regData = await UserModel.findById({ _id }).select("name regNo");
         if (!regData) {
             unauthAccess(res);
             return;
         }
         const { name, regNo } = regData;
-        const accessToken = jwt.sign({ name, regNo, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
-        const refreshToken = jwt.sign({ regNo, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
         statusOkay(res, { accessToken, refreshToken, name, regNo })  
     } catch(err) {
         unauthAccess(res);

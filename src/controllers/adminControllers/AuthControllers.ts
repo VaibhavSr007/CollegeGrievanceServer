@@ -7,14 +7,6 @@ import AdminModel from '../../models/Admins';
 config();
 
 
-interface decodedTokenType {
-    name: string,
-    dept: number,
-    email: string,
-    empNo: string,
-}
-
-
 export async function registerAdminController(req: Request, res: Response) {
     try {
         const { name, dept, email, pass, isSuperUser} = req.body;
@@ -50,14 +42,14 @@ export async function loginAdminController(req: Request, res: Response) {
             badRequest(res);
             return;
         }
-        const empData = await AdminModel.findOne({empNo: empNo}).select("name pass isSuperUser");
+        const empData = await AdminModel.findOne({empNo: empNo}).select("_id name pass isSuperUser");
         if (!empData || !await compare(pass, empData.pass!)) {
             wrongCredentials(res);
             return;
         }
-        const { name, isSuperUser } = empData;
-        const accessToken = jwt.sign({ name, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
-        const refreshToken = jwt.sign({ empNo, isSuperUser, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
+        const { _id, name, isSuperUser } = empData;
+        const accessToken = jwt.sign({ _id, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const refreshToken = jwt.sign({ _id, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'});
         statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser });
     }
      catch(err) {
@@ -66,17 +58,18 @@ export async function loginAdminController(req: Request, res: Response) {
 }
 
 
-export async function issueAdminToken(req: Request, res: Response, decodedjwt: decodedTokenType) {
+export async function issueAdminToken(req: Request, res: Response) {
     try {
-        const empData = await AdminModel.findOne({empNo: decodedjwt.empNo}).select("name empNo isSuperUser");
+        const _id = res.locals._id;
+        const accessToken = res.locals.accessToken;
+        const refreshToken = res.locals.refreshToken;
+        const empData = await AdminModel.findById({ _id }).select("name empNo isSuperUser");
         if (!empData) {
             unauthAccess(res);
             return;
         }
-        const { name, empNo, isSuperUser } = empData;
-        const accessToken = jwt.sign({ name, empNo, isSuperUser, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
-        const refreshToken = jwt.sign({ empNo, isSuperUser, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'})
-        statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser })
+        const { name, isSuperUser, empNo } = empData;
+        statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser });
     } catch(err) {
         unauthAccess(res);
     }

@@ -8,7 +8,7 @@ import { getGrievancesController } from './controllers/GrievancesControllers';
 import { statusOkay } from './views/view';
 import { deleteController, issueToken, loginController, registerController } from './controllers/AuthControllers';
 import { postUserGrievancesController } from './controllers/userControllers/GrievancesControllers';
-import { changePasswordController } from './controllers/PasswordControllers';
+import { changePasswordController, sendOTPController } from './controllers/PasswordControllers';
 
 
 config();
@@ -18,11 +18,12 @@ app.use(cors());
 
 app.get('/ping', (_, res: Response) => statusOkay(res, {message: "Server Running"}));
 app.get('/accesstoken', issueToken);
+app.get('/forget-password', sendOTPController);
 app.post('/login', loginController);
 app.post('/register', registerController);
 
 app.use(AuthMiddleWare);
-app.get('/grievances/:no', getGrievancesController);
+app.get('/grievances', getGrievancesController);
 app.post('/grievances', postUserGrievancesController);
 app.delete('/grievances/:no', deleteController);
 app.post('/change-password', changePasswordController);

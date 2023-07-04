@@ -5,17 +5,15 @@ import { deleteUserController, issueUserToken, loginUserController, registerUser
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { unauthAccess } from '../views/view';
+import { ObjectId } from 'mongodb';
+import UserModel from '../models/Users';
+import AdminModel from '../models/Admins';
 config();
 
 
 interface jwtPayload {
-    regNo: string,
-    empNo: string,
+    _id: ObjectId,
     isAccessToken: boolean | null
-    name: string,
-    year: number,
-    email: string,
-    dept: number,
 }
 
 
@@ -79,26 +77,33 @@ export async function issueToken(req: Request, res: Response) {
             unauthAccess(res);
             return;
         }
-        const userNum = refreshTokenHeader.split(' ')[1];
-        const refreshJWTToken = refreshTokenHeader.split(' ')[2];
+        const refreshJWTToken = refreshTokenHeader.split(' ')[1];
         if (!refreshJWTToken) {
             unauthAccess(res);
             return;
         }
         const decodedjwt = (jwt.verify(refreshJWTToken, (process.env.SECRET_KEY as string)) as jwtPayload);
-        if ((!decodedjwt.empNo && !decodedjwt.regNo) || decodedjwt.isAccessToken){
+        if (!decodedjwt._id || decodedjwt.isAccessToken){
             unauthAccess(res);
             return;
         }
-        if ((decodedjwt.regNo && decodedjwt.regNo !== userNum) || (decodedjwt.empNo && decodedjwt.empNo !== userNum)){
-            unauthAccess(res);
-            return;
-        }
+        const _id = decodedjwt._id;
+        const { regNo } = (await UserModel.findById({ _id }).select("regNo") as {regNo: string}) || { regNo: "" };
+        const { empNo } = (await AdminModel.findById({ _id }).select("empNo") as {empNo: string}) || { empNo: "" };
 
-        if (decodedjwt.regNo)
-            issueUserToken(req, res, decodedjwt)
-        else
-            issueAdminToken(req, res, decodedjwt)
+        res.locals._id = _id;
+        res.locals.accessToken = jwt.sign({ _id, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        res.locals.refreshToken = jwt.sign({ _id, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'});
+
+        if (regNo) {
+            issueUserToken(req, res);
+        }
+        else if (empNo){
+            issueAdminToken(req, res);
+        }
+        else {
+            unauthAccess(res);
+        }
     } catch(err) {
         unauthAccess(res);
     }

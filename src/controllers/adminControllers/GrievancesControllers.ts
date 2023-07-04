@@ -5,8 +5,8 @@ import AdminModel from '../../models/Admins';
 
 export async function getAdminGrievancesController(req: Request, res: Response) {
     try {
-        const empNo = req.params.no.toUpperCase();
-        const empData = await AdminModel.findOne({ empNo: empNo }).select("name dept isSuperUser");
+        const _id = res.locals._id;
+        const empData = await AdminModel.findById({ _id }).select("name dept isSuperUser");
         if (!empData) {
             unauthAccess(res);
             return;

@@ -1,33 +1,38 @@
 import { Request, Response, NextFunction } from 'express';
-import { unauthAccess } from '../views/view';
+import { serverError, unauthAccess } from '../views/view';
 import jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
+import AdminModel from '../models/Admins';
+import UserModel from '../models/Users';
 
 interface jwtPayload {
-    regNo: string,
-    empNo: string,
-    isAccessToken: boolean | null
+    _id: ObjectId,
+    isAccessToken: boolean
 }
 
-export function AuthMiddleWare(req: Request, res: Response, next: NextFunction) {
+export async function AuthMiddleWare(req: Request, res: Response, next: NextFunction) {
     try {
         const authrisationToken = req.headers.authorization;
         if (!authrisationToken) {
             unauthAccess(res);
             return;
         }
-        const userNo = authrisationToken.split(' ')[1];
-        const jwtToken = authrisationToken.split(' ')[2];
-        const decodedjwt = (jwt.verify(jwtToken, (process.env.SECRET_KEY as string)) as jwtPayload)
+        const jwtToken = authrisationToken.split(' ')[1];
+        const decodedjwt = (jwt.verify(jwtToken, (process.env.SECRET_KEY as string)) as jwtPayload);
+
         if (!decodedjwt || !decodedjwt.isAccessToken) {
             unauthAccess(res);
             return;
         }
-        if ((decodedjwt.regNo && decodedjwt.regNo !== userNo) || (decodedjwt.empNo && decodedjwt.empNo !== userNo)){
+        const userData = await AdminModel.findById({ _id: decodedjwt._id }).select("empNo");
+        const empData = await UserModel.findById({ _id: decodedjwt._id }).select("regNo");
+        if (!userData && !empData) {
             unauthAccess(res);
-            return;    
+            return;
         }
+        res.locals._id = decodedjwt._id;
         next();
     } catch (err) {
-        unauthAccess(res);
+        serverError(res, err);
     }
 }

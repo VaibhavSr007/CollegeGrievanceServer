@@ -23,13 +23,17 @@ export async function changePasswordController(req: Request, res: Response) {
 
 
 export async function sendOTPController(req: Request, res: Response) {
-    const userNum = req.params.no;
-    if (!userNum) {
-        badRequest(res);
-        return;
+    try {
+        const userNum = req.params.no;
+        if (!userNum) {
+            badRequest(res);
+            return;
+        }
+        if (userNum.toLowerCase() === userNum.toUpperCase())
+            sendAdminOTPController(req, res);
+        else
+            sendUserOTPController(req, res);
+    } catch(err) {
+        serverError(res, err);
     }
-    if (userNum.toLowerCase() === userNum.toUpperCase())
-        sendAdminOTPController(req, res);
-    else
-        sendUserOTPController(req, res);
 }

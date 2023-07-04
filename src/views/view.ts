@@ -17,6 +17,10 @@ export function serverError(res: Response, err: unknown) {
     res.status(500).json({message: 'Internal Server Error'});
 }
 
+export function notFound(res: Response) {
+    res.status(404).json({message: 'Not Found'});
+}
+
 export function statusOkay(res: Response, message: any) {
     res.status(200).json(message);
 }
