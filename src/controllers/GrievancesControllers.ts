@@ -13,13 +13,9 @@ export async function getGrievancesController(req: Request, res: Response) {
 
         if (empNo)
         	getAdminGrievancesController(req, res);
-        else if (regNo){
+        else {
             res.locals.regNo = regNo;
         	getUserGrievancesController(req, res);
-        }
-        else {
-            badRequest(res);
-            return;
         }
     } catch(err) {
         serverError(res, err);

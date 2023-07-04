@@ -13,7 +13,7 @@ config();
 
 interface jwtPayload {
     _id: ObjectId,
-    isAccessToken: boolean | null
+    isAccessToken: boolean
 }
 
 
@@ -95,15 +95,12 @@ export async function issueToken(req: Request, res: Response) {
         res.locals.accessToken = jwt.sign({ _id, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
         res.locals.refreshToken = jwt.sign({ _id, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'});
 
-        if (regNo) {
+        if (regNo)
             issueUserToken(req, res);
-        }
-        else if (empNo){
+        else if (empNo)
             issueAdminToken(req, res);
-        }
-        else {
+        else
             unauthAccess(res);
-        }
     } catch(err) {
         unauthAccess(res);
     }

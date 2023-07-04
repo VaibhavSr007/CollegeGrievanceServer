@@ -42,7 +42,7 @@ export async function loginUserController(req: Request, res: Response) {
             badRequest(res);
             return;
         }
-        const regData = await UserModel.findOne({regNo: regNo}).select("_id name pass");
+        const regData = await UserModel.findOne({ regNo }).select("_id name pass");
         if (!regData || !await compare(pass, regData.pass!)) {
             wrongCredentials(res);
             return;
