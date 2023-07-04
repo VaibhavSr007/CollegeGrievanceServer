@@ -14,6 +14,7 @@ export async function getUserGrievancesController(req: Request, res: Response) {
     }
 }
 
+
 export async function postUserGrievancesController(req: Request, res: Response) {
     try {
         const { subject, complaint, relatedDepts, isAnonymous } = req.body;

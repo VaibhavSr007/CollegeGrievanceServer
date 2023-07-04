@@ -33,6 +33,6 @@ export async function AuthMiddleWare(req: Request, res: Response, next: NextFunc
         res.locals._id = decodedjwt._id;
         next();
     } catch (err) {
-        serverError(res, err);
+        unauthAccess(res);
     }
 }

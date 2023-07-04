@@ -5,6 +5,7 @@ import { getAdminGrievancesController } from './adminControllers/GrievancesContr
 import AdminModel from '../models/Admins';
 import UserModel from '../models/Users';
 
+
 export async function getGrievancesController(req: Request, res: Response) {
     try {
         const _id = res.locals._id;
