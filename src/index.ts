@@ -24,7 +24,7 @@ app.get('/accesstoken', issueToken);
 app.get('/forget-password', sendOTPController);
 app.post('/login', loginController);
 app.post('/register', registerController);
-app.get('/tags', getAdminTagsController)
+app.get('/tags', getAdminTagsController);
 
 app.use(AuthMiddleWare);
 app.get('/grievances', getGrievancesController);

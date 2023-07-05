@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { badRequest, serverError } from '../views/view';
-import { deleteAdminController, issueAdminToken, loginAdminController, registerAdminController } from './adminControllers/AuthControllers';
-import { deleteUserController, issueUserToken, loginUserController, registerUserController } from './userControllers/AuthControllers';
+import { badRequest, serverError, statusOkay } from '../views/view';
+import { deleteAdminController, loginAdminController, registerAdminController } from './adminControllers/AuthControllers';
+import { deleteUserController, loginUserController, registerUserController } from './userControllers/AuthControllers';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { unauthAccess } from '../views/view';
@@ -88,17 +88,19 @@ export async function issueToken(req: Request, res: Response) {
             return;
         }
         const _id = decodedjwt._id;
-        const { regNo } = (await UserModel.findById({ _id }).select("regNo") as {regNo: string}) || { regNo: "" };
-        const { empNo } = (await AdminModel.findById({ _id }).select("empNo") as {empNo: string}) || { empNo: "" };
-
-        res.locals._id = _id;
-        res.locals.accessToken = jwt.sign({ _id, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
-        res.locals.refreshToken = jwt.sign({ _id, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'});
-
-        if (regNo)
-            issueUserToken(req, res);
-        else if (empNo)
-            issueAdminToken(req, res);
+        const accessToken = jwt.sign({ _id, isAccessToken: true }, (process.env.SECRET_KEY as string), {expiresIn: '1h'});
+        const refreshToken = jwt.sign({ _id, isAccessToken: false }, (process.env.SECRET_KEY as string), {expiresIn: '10d'});
+    
+        const userData = await UserModel.findById({ _id }).select("name regNo");
+        const empData = await AdminModel.findById({ _id }).select("name empNo isSuperUser");
+        if (userData) {
+            const { name, regNo } = userData;
+            statusOkay(res, { accessToken, refreshToken, name, regNo })  
+        }
+        else if (empData) {
+            const { name, empNo, isSuperUser } = empData;
+            statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser })  
+        }
         else
             unauthAccess(res);
     } catch(err) {

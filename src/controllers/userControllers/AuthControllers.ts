@@ -56,21 +56,3 @@ export async function loginUserController(req: Request, res: Response) {
         serverError(res, err);
     }
 }
-
-
-export async function issueUserToken(req: Request, res: Response) {
-    try {
-        const _id = res.locals._id;
-        const accessToken = res.locals.accessToken;
-        const refreshToken = res.locals.refreshToken;
-        const regData = await UserModel.findById({ _id }).select("name regNo");
-        if (!regData) {
-            unauthAccess(res);
-            return;
-        }
-        const { name, regNo } = regData;
-        statusOkay(res, { accessToken, refreshToken, name, regNo })  
-    } catch(err) {
-        unauthAccess(res);
-    }
-}

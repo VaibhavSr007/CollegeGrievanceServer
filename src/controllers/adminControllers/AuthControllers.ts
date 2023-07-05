@@ -56,21 +56,3 @@ export async function loginAdminController(req: Request, res: Response) {
         serverError(res, err);
     }
 }
-
-
-export async function issueAdminToken(req: Request, res: Response) {
-    try {
-        const _id = res.locals._id;
-        const accessToken = res.locals.accessToken;
-        const refreshToken = res.locals.refreshToken;
-        const empData = await AdminModel.findById({ _id }).select("name empNo isSuperUser");
-        if (!empData) {
-            unauthAccess(res);
-            return;
-        }
-        const { name, isSuperUser, empNo } = empData;
-        statusOkay(res, { accessToken, refreshToken, name, empNo, isSuperUser });
-    } catch(err) {
-        unauthAccess(res);
-    }
-}
