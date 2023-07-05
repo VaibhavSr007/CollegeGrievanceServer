@@ -24,13 +24,26 @@ export async function AuthMiddleWare(req: Request, res: Response, next: NextFunc
             unauthAccess(res);
             return;
         }
-        const userData = await AdminModel.findById({ _id: decodedjwt._id }).select("empNo");
-        const empData = await UserModel.findById({ _id: decodedjwt._id }).select("regNo");
+        const empData = await AdminModel.findById({ _id: decodedjwt._id });
+        const userData = await UserModel.findById({ _id: decodedjwt._id });
         if (!userData && !empData) {
             unauthAccess(res);
             return;
         }
         res.locals._id = decodedjwt._id;
+        if (userData) {
+            res.locals.name = userData.name;
+            res.locals.regNo = userData.regNo;
+            res.locals.email = userData.email;
+            res.locals.year = userData.year;
+        } 
+        if (empData) {
+            res.locals.name = empData.name;
+            res.locals.empNo = empData.empNo;
+            res.locals.email = empData.email;
+            res.locals.dept = empData.dept;
+            res.locals.isSuperUser = empData.isSuperUser;
+        }
         next();
     } catch (err) {
         unauthAccess(res);
