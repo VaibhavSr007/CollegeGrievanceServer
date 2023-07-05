@@ -11,6 +11,7 @@ import { deleteController, issueToken, loginController, registerController } fro
 import { postUserGrievancesController } from './controllers/userControllers/GrievancesControllers';
 import { changePasswordController, sendOTPController } from './controllers/PasswordControllers';
 import getAdminTagsController from './controllers/getAdminTagsController';
+import getProfileDataController from './controllers/getProfileDataController';
 
 config();
 const app = express();
@@ -27,6 +28,7 @@ app.post('/register', registerController);
 app.get('/tags', getAdminTagsController);
 
 app.use(AuthMiddleWare);
+app.get('/profile', getProfileDataController);
 app.get('/grievances', getGrievancesController);
 app.post('/grievances', postUserGrievancesController);
 app.post('/grievances/change-status/', changeGrievanceStatusController),
