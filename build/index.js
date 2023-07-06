@@ -21,6 +21,10 @@ const compression_1 = __importDefault(require("compression"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
+// Uncomment in the final commit
+// app.use(cors({
+//     origin: "https://vitb-grievances.aayush65.com/"
+// }));
 app.use((0, compression_1.default)({ level: 6, threshold: 1024 }));
 const client = (0, redis_1.createClient)();
 app.get('/ping', (_, res) => (0, view_1.statusOkay)(res, { message: "Server Running" }));

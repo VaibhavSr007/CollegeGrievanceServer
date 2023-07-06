@@ -17,6 +17,8 @@ const view_1 = require("../views/view");
 const GrievancesControllers_1 = require("./userControllers/GrievancesControllers");
 const GrievancesControllers_2 = require("./adminControllers/GrievancesControllers");
 const Grievance_1 = __importDefault(require("../models/Grievance"));
+const sendMail_1 = __importDefault(require("../utils/sendMail"));
+const Users_1 = __importDefault(require("../models/Users"));
 function getGrievancesController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -43,10 +45,37 @@ function changeGrievanceStatusController(req, res) {
                 (0, view_1.badRequest)(res);
                 return;
             }
-            if (status)
-                yield Grievance_1.default.findOneAndUpdate({ _id }, { status: status });
-            else
-                yield Grievance_1.default.findOneAndUpdate({ _id }, { $push: { remarks: [res.locals.name, remark] }, $set: { status: "opened" } });
+            const mailOptions = { subject: "", body: "", html: "" };
+            const options = [{ _id }];
+            if (status) {
+                options.push({ status });
+                options.push({ new: true });
+                mailOptions.subject = `Your complaint status has changed`;
+                mailOptions.body = `Your complaint status of id:${_id} changed to ${status}`;
+                mailOptions.html = `<p>Your complaint status of id:${_id} changed to ${status}</p><br /><p>Click <a href="${'https://vitb-grievances.aayush65.com/'}">here</a> for more details</p>`;
+            }
+            else {
+                options.push({ $push: { remarks: [res.locals.name, remark] }, $set: { status: "opened" } });
+                options.push({ new: true });
+                mailOptions.subject = `A new remark added to your grievance`;
+                mailOptions.body = `A new remark has been added to your grievance of id:${_id} \n Latest Remark:  ${remark}`;
+                mailOptions.html = `<p>A new remark has been added to your grievance of id:${_id}<br/><p>Latest Remark:  ${remark}<br/>Visit for more information: <a href="${'https://vitb-grievances.aayush65.com/'}">here</a></p>`;
+            }
+            const response = yield Grievance_1.default.findOneAndUpdate(...options);
+            if (!response) {
+                (0, view_1.notFound)(res);
+                return;
+            }
+            const { regNo } = response;
+            if (regNo) {
+                const userData = yield Users_1.default.findOne({ regNo }).select("email");
+                if (!userData) {
+                    (0, view_1.notFound)(res);
+                    return;
+                }
+                const { email } = userData;
+                (0, sendMail_1.default)(email, mailOptions.subject, mailOptions.body, mailOptions.html);
+            }
             (0, view_1.statusOkay)(res, { message: "Grievance status changed successfully" });
         }
         catch (err) {

@@ -12,12 +12,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const sendMail_1 = __importDefault(require("./sendMail"));
-function sendOTP(email) {
+const dotenv_1 = require("dotenv");
+const nodemailer_1 = __importDefault(require("nodemailer"));
+(0, dotenv_1.config)();
+const transporter = nodemailer_1.default.createTransport({
+    host: 'us2.smtp.mailhostbox.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD
+    }
+});
+function sendMail(email, subject, text, html) {
     return __awaiter(this, void 0, void 0, function* () {
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        yield (0, sendMail_1.default)(email, 'OTP for login', `Your OTP is ${otp}`, "");
-        return otp;
+        console.log(process.env.EMAIL, email);
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            html,
+            subject,
+            text,
+        };
+        try {
+            yield transporter.sendMail(mailOptions);
+            return true;
+        }
+        catch (error) {
+            console.log(error);
+            return false;
+        }
     });
 }
-exports.default = sendOTP;
+exports.default = sendMail;
