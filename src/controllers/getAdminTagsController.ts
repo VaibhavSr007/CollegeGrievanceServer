@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { serverError } from '../views/view';
+import { serverError, statusOkay } from '../views/view';
 import AdminModel from '../models/Admins';
 
 
@@ -10,9 +10,11 @@ export default async function getAdminTagsController(req: Request, res: Response
             { $project: { _id: 0, allTags: { $concatArrays: ['$names', '$depts'] }}},
             { $unwind: '$allTags' },
             { $group: { _id: null, allTags: { $addToSet: '$allTags' }}}
-          ]);
-
-        res.json(allTags[0].allTags);
+        ]);
+        if (allTags)
+            statusOkay(res, allTags[0].allTags);
+        else
+            statusOkay(res, []);
     } catch(err) {
         serverError(res, err);
     }
