@@ -11,7 +11,7 @@ export default async function getAdminTagsController(req: Request, res: Response
             { $unwind: '$allTags' },
             { $group: { _id: null, allTags: { $addToSet: '$allTags' }}}
         ]);
-        if (allTags)
+        if (allTags.length)
             statusOkay(res, allTags[0].allTags);
         else
             statusOkay(res, []);
