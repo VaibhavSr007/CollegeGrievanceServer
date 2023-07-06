@@ -23,7 +23,10 @@ function getAdminTagsController(req, res) {
                 { $unwind: '$allTags' },
                 { $group: { _id: null, allTags: { $addToSet: '$allTags' } } }
             ]);
-            res.json(allTags[0].allTags);
+            if (allTags)
+                (0, view_1.statusOkay)(res, allTags[0].allTags);
+            else
+                (0, view_1.statusOkay)(res, []);
         }
         catch (err) {
             (0, view_1.serverError)(res, err);
