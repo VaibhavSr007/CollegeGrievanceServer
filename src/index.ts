@@ -12,11 +12,13 @@ import { postUserGrievancesController } from './controllers/userControllers/Grie
 import { changePasswordController, sendOTPController } from './controllers/PasswordControllers';
 import getAdminTagsController from './controllers/getAdminTagsController';
 import getProfileDataController from './controllers/getProfileDataController';
+import compression from 'compression';
 
 config();
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(compression({ level: 6, threshold: 1024 }));
 const client = createClient();
 
 
