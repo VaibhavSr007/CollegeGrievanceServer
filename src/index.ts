@@ -7,12 +7,14 @@ import { Response } from 'express';
 import { AuthMiddleWare } from './middleware/AuthMiddleware';
 import { changeGrievanceStatusController, getGrievancesController } from './controllers/GrievancesControllers';
 import { statusOkay } from './views/view';
-import { deleteController, issueToken, loginController, registerController } from './controllers/AuthControllers';
+import { deleteController, issueToken, loginController } from './controllers/AuthControllers';
 import { postUserGrievancesController } from './controllers/userControllers/GrievancesControllers';
 import { changePasswordController, sendOTPController } from './controllers/PasswordControllers';
 import getAdminTagsController from './controllers/getAdminTagsController';
 import getProfileDataController from './controllers/getProfileDataController';
 import compression from 'compression';
+import { registerUserController } from './controllers/userControllers/AuthControllers';
+import { registerAdminController } from './controllers/adminControllers/AuthControllers';
 
 config();
 const app = express();
@@ -30,10 +32,11 @@ app.get('/ping', (_, res: Response) => statusOkay(res, {message: "Server Running
 app.get('/accesstoken', issueToken);
 app.get('/forget-password', sendOTPController);
 app.post('/login', loginController);
-app.post('/register', registerController);
+app.post('/register', registerUserController);
 app.get('/tags', getAdminTagsController);
 
 app.use(AuthMiddleWare);
+app.post('/register-admins', registerAdminController);
 app.get('/profile', getProfileDataController);
 app.get('/grievances', getGrievancesController);
 app.post('/grievances', postUserGrievancesController);

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.issueToken = exports.loginController = exports.deleteController = exports.registerController = void 0;
+exports.issueToken = exports.loginController = exports.deleteController = void 0;
 const view_1 = require("../views/view");
 const AuthControllers_1 = require("./adminControllers/AuthControllers");
 const AuthControllers_2 = require("./userControllers/AuthControllers");
@@ -22,25 +22,6 @@ const view_2 = require("../views/view");
 const Users_1 = __importDefault(require("../models/Users"));
 const Admins_1 = __importDefault(require("../models/Admins"));
 (0, dotenv_1.config)();
-function registerController(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { regNo, empNo } = req.body;
-            if (!regNo && !empNo) {
-                (0, view_1.badRequest)(res);
-                return;
-            }
-            if (regNo)
-                (0, AuthControllers_2.registerUserController)(req, res);
-            else
-                (0, AuthControllers_1.registerAdminController)(req, res);
-        }
-        catch (err) {
-            (0, view_1.serverError)(res, err);
-        }
-    });
-}
-exports.registerController = registerController;
 function deleteController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

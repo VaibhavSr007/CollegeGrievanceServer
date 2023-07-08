@@ -2,15 +2,18 @@ import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { compare, encrypt } from '../../utils/hash';
-import { badRequest, serverError, statusOkay, unauthAccess, wrongCredentials } from '../../views/view';
+import { badRequest, serverError, statusOkay, wrongCredentials } from '../../views/view';
 import AdminModel from '../../models/Admins';
 config();
 
 
 export async function registerAdminController(req: Request, res: Response) {
     try {
-        const { name, dept, email, pass, isSuperUser} = req.body;
-        if (!name || !dept || !email || !pass || isSuperUser === undefined) {
+        if (!res.locals.isSuperUser) {
+            wrongCredentials(res);
+        }
+        const { name, empNo, dept, email, pass, isSuperUser } = req.body;
+        if (!name || !empNo || !dept || !email || !pass || isSuperUser === undefined) {
             badRequest(res);
             return;
         }

@@ -22,8 +22,11 @@ const Admins_1 = __importDefault(require("../../models/Admins"));
 function registerAdminController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { name, dept, email, pass, isSuperUser } = req.body;
-            if (!name || !dept || !email || !pass || isSuperUser === undefined) {
+            if (!res.locals.isSuperUser) {
+                (0, view_1.wrongCredentials)(res);
+            }
+            const { name, empNo, dept, email, pass, isSuperUser } = req.body;
+            if (!name || !empNo || !dept || !email || !pass || isSuperUser === undefined) {
                 (0, view_1.badRequest)(res);
                 return;
             }

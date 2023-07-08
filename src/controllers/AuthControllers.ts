@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { badRequest, serverError, statusOkay } from '../views/view';
-import { deleteAdminController, loginAdminController, registerAdminController } from './adminControllers/AuthControllers';
-import { deleteUserController, loginUserController, registerUserController } from './userControllers/AuthControllers';
+import { deleteAdminController, loginAdminController } from './adminControllers/AuthControllers';
+import { deleteUserController, loginUserController } from './userControllers/AuthControllers';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 import { unauthAccess } from '../views/view';
@@ -14,24 +14,6 @@ config();
 interface jwtPayload {
     _id: ObjectId,
     isAccessToken: boolean
-}
-
-
-export async function registerController(req: Request, res: Response) {
-    try {
-        const { regNo, empNo } = req.body;
-        if (!regNo && !empNo) {
-            badRequest(res);
-            return;
-        }
-        if (regNo)
-            registerUserController(req, res);
-        else
-            registerAdminController(req, res);
-    }
-     catch(err) {
-        serverError(res, err);
-    }
 }
 
 
