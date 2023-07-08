@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import { compare, encrypt } from '../../utils/hash';
 import { badRequest, serverError, statusOkay, wrongCredentials } from '../../views/view';
 import AdminModel from '../../models/Admins';
+import { redisClient } from '../../redisClient';
 config();
 
 
@@ -11,6 +12,7 @@ export async function registerAdminController(req: Request, res: Response) {
     try {
         if (!res.locals.isSuperUser) {
             wrongCredentials(res);
+            return;
         }
         const { name, empNo, dept, email, pass, isSuperUser } = req.body;
         if (!name || !empNo || !dept || !email || !pass || isSuperUser === undefined) {
@@ -20,6 +22,7 @@ export async function registerAdminController(req: Request, res: Response) {
         req.body.pass = await encrypt(req.body.pass);
         const newAdmin = new AdminModel(req.body);
         await newAdmin.save();
+        await redisClient.del("allTags");
         statusOkay(res, {message: "Admin Added Successfully"});
     } catch(err) {
         serverError(res, err);
@@ -30,7 +33,13 @@ export async function registerAdminController(req: Request, res: Response) {
 export async function deleteAdminController(req: Request, res: Response) {
     try {
         const empNo = req.params.no.toUpperCase();
-        await AdminModel.deleteOne({empNo: empNo});
+        const response = await AdminModel.deleteOne({ empNo });
+        console.log(response);
+        if (response.deletedCount === 0) {
+            wrongCredentials(res);
+            return;
+        }
+        await redisClient.del("allTags");
         statusOkay(res, {message: "Admin Deleted Successfully"});
     } catch(err) {
         serverError(res, err);

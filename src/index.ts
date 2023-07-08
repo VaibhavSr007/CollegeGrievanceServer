@@ -1,5 +1,4 @@
 import express from 'express';
-import { createClient } from 'redis';
 import { config } from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -15,6 +14,7 @@ import getProfileDataController from './controllers/getProfileDataController';
 import compression from 'compression';
 import { registerUserController } from './controllers/userControllers/AuthControllers';
 import { registerAdminController } from './controllers/adminControllers/AuthControllers';
+import { redisClient } from './redisClient';
 
 config();
 const app = express();
@@ -25,7 +25,6 @@ app.use(cors());
 //     origin: "https://vitb-grievances.aayush65.com/"
 // }));
 app.use(compression({ level: 6, threshold: 1024 }));
-const client = createClient();
 
 
 app.get('/ping', (_, res: Response) => statusOkay(res, {message: "Server Running"}));
@@ -36,14 +35,16 @@ app.post('/register', registerUserController);
 app.get('/tags', getAdminTagsController);
 
 app.use(AuthMiddleWare);
-app.post('/register-admins', registerAdminController);
-app.delete('/delete/:no', deleteController);
-app.get('/profile', getProfileDataController);
+
 app.get('/grievances', getGrievancesController);
 app.post('/grievances', postUserGrievancesController);
 app.post('/grievances/change-status/', changeGrievanceStatusController),
 app.delete('/grievances/:no', deleteController);
+
+app.get('/profile', getProfileDataController);
+app.post('/register-admins', registerAdminController);
 app.post('/change-password', changePasswordController);
+app.delete('/delete/:no', deleteController);
 
 mongoose.connect(process.env.MONGO_URL!)
     .then(() => {
@@ -51,8 +52,9 @@ mongoose.connect(process.env.MONGO_URL!)
         console.log(`Connected to MongoDB and Listening on Port ${process.env.PORT}`);
         app.listen(process.env.PORT);
     })
-    // .then(() => client.on('error', err => console.log('Redis Client', err)))
-    // .then(() => client.connect())
+    .then(() => redisClient.on('error', err => console.log('Redis Client', err)))
+    .then(() => redisClient.connect())
+    .then(() => console.log('Connected to Redis'))
     .catch((err) => {
         console.clear();
         console.log("Can't connect to the MongoDB");

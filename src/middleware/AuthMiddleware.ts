@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { serverError, unauthAccess } from '../views/view';
+import { unauthAccess } from '../views/view';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 import AdminModel from '../models/Admins';

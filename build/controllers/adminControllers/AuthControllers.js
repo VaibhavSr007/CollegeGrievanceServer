@@ -18,12 +18,14 @@ const dotenv_1 = require("dotenv");
 const hash_1 = require("../../utils/hash");
 const view_1 = require("../../views/view");
 const Admins_1 = __importDefault(require("../../models/Admins"));
+const redisClient_1 = require("../../redisClient");
 (0, dotenv_1.config)();
 function registerAdminController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!res.locals.isSuperUser) {
                 (0, view_1.wrongCredentials)(res);
+                return;
             }
             const { name, empNo, dept, email, pass, isSuperUser } = req.body;
             if (!name || !empNo || !dept || !email || !pass || isSuperUser === undefined) {
@@ -33,6 +35,7 @@ function registerAdminController(req, res) {
             req.body.pass = yield (0, hash_1.encrypt)(req.body.pass);
             const newAdmin = new Admins_1.default(req.body);
             yield newAdmin.save();
+            yield redisClient_1.redisClient.del("allTags");
             (0, view_1.statusOkay)(res, { message: "Admin Added Successfully" });
         }
         catch (err) {
@@ -45,7 +48,13 @@ function deleteAdminController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const empNo = req.params.no.toUpperCase();
-            yield Admins_1.default.deleteOne({ empNo: empNo });
+            const response = yield Admins_1.default.deleteOne({ empNo });
+            console.log(response);
+            if (response.deletedCount === 0) {
+                (0, view_1.wrongCredentials)(res);
+                return;
+            }
+            yield redisClient_1.redisClient.del("allTags");
             (0, view_1.statusOkay)(res, { message: "Admin Deleted Successfully" });
         }
         catch (err) {
