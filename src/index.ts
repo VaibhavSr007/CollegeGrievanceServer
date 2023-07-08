@@ -37,6 +37,7 @@ app.get('/tags', getAdminTagsController);
 
 app.use(AuthMiddleWare);
 app.post('/register-admins', registerAdminController);
+app.delete('/delete/:no', deleteController);
 app.get('/profile', getProfileDataController);
 app.get('/grievances', getGrievancesController);
 app.post('/grievances', postUserGrievancesController);

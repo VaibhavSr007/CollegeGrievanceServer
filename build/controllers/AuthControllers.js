@@ -25,6 +25,10 @@ const Admins_1 = __importDefault(require("../models/Admins"));
 function deleteController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            if (!res.locals.isSuperUser) {
+                (0, view_1.wrongCredentials)(res);
+                return;
+            }
             const userNum = req.params.no;
             if (!userNum) {
                 (0, view_1.badRequest)(res);

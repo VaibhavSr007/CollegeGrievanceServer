@@ -37,6 +37,7 @@ app.post('/register', AuthControllers_2.registerUserController);
 app.get('/tags', getAdminTagsController_1.default);
 app.use(AuthMiddleware_1.AuthMiddleWare);
 app.post('/register-admins', AuthControllers_3.registerAdminController);
+app.delete('/delete/:no', AuthControllers_1.deleteController);
 app.get('/profile', getProfileDataController_1.default);
 app.get('/grievances', GrievancesControllers_1.getGrievancesController);
 app.post('/grievances', GrievancesControllers_2.postUserGrievancesController);

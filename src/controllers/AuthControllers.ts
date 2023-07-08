@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { badRequest, serverError, statusOkay } from '../views/view';
+import { badRequest, serverError, statusOkay, wrongCredentials } from '../views/view';
 import { deleteAdminController, loginAdminController } from './adminControllers/AuthControllers';
 import { deleteUserController, loginUserController } from './userControllers/AuthControllers';
 import jwt from 'jsonwebtoken';
@@ -19,6 +19,10 @@ interface jwtPayload {
 
 export async function deleteController(req: Request, res: Response) {
     try {
+        if (!res.locals.isSuperUser) {
+            wrongCredentials(res);
+            return;
+        }
         const userNum = req.params.no;
         if (!userNum) {
             badRequest(res);
