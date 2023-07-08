@@ -26,7 +26,7 @@ function getUserGrievancesController(req, res) {
             }
             const regNo = res.locals.regNo;
             const grievances = yield Grievance_1.default.find({ regNo });
-            yield redisClient_1.redisClient.set(res.locals.regNo, JSON.stringify(grievances));
+            yield redisClient_1.redisClient.setEx(res.locals.regNo, 30 * 60, JSON.stringify(grievances));
             (0, view_1.statusOkay)(res, grievances);
         }
         catch (err) {

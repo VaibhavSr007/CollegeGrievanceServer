@@ -13,7 +13,7 @@ export async function getUserGrievancesController(req: Request, res: Response) {
         }
         const regNo = res.locals.regNo;
         const grievances = await GrievanceModel.find({ regNo });
-        await redisClient.set(res.locals.regNo, JSON.stringify(grievances));
+        await redisClient.setEx(res.locals.regNo, 30 * 60, JSON.stringify(grievances));
         statusOkay(res, grievances);
     } catch(err) {
         serverError(res, err);

@@ -30,7 +30,7 @@ function getAdminTagsController(req, res) {
                 { $group: { _id: null, allTags: { $addToSet: '$allTags' } } }
             ]);
             if (allTags.length) {
-                redisClient_1.redisClient.set("allTags", JSON.stringify(allTags[0].allTags));
+                redisClient_1.redisClient.setEx("allTags", 30 * 60, JSON.stringify(allTags[0].allTags));
                 (0, view_1.statusOkay)(res, allTags[0].allTags);
             }
             else

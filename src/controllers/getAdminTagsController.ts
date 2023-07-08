@@ -18,7 +18,7 @@ export default async function getAdminTagsController(req: Request, res: Response
             { $group: { _id: null, allTags: { $addToSet: '$allTags' }}}
         ]);
         if (allTags.length){
-            redisClient.set("allTags", JSON.stringify(allTags[0].allTags));
+            redisClient.setEx("allTags", 30 * 60, JSON.stringify(allTags[0].allTags));
             statusOkay(res, allTags[0].allTags);
         }
         else
