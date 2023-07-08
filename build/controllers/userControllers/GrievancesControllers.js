@@ -15,11 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postUserGrievancesController = exports.getUserGrievancesController = void 0;
 const Grievance_1 = __importDefault(require("../../models/Grievance"));
 const view_1 = require("../../views/view");
+const redisClient_1 = require("../../redisClient");
 function getUserGrievancesController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const cachedData = yield redisClient_1.redisClient.get(res.locals.regNo);
+            if (cachedData) {
+                (0, view_1.statusOkay)(res, JSON.parse(cachedData));
+                return;
+            }
             const regNo = res.locals.regNo;
             const grievances = yield Grievance_1.default.find({ regNo });
+            yield redisClient_1.redisClient.set(res.locals.regNo, JSON.stringify(grievances));
             (0, view_1.statusOkay)(res, grievances);
         }
         catch (err) {
@@ -43,6 +50,7 @@ function postUserGrievancesController(req, res) {
                 complaintDetails.regNo = '';
             const grievanceObj = new Grievance_1.default(complaintDetails);
             yield grievanceObj.save();
+            yield redisClient_1.redisClient.del(regNo);
             (0, view_1.statusOkay)(res, { message: 'Grievance submitted successfully' });
         }
         catch (err) {

@@ -19,6 +19,7 @@ const GrievancesControllers_2 = require("./adminControllers/GrievancesController
 const Grievance_1 = __importDefault(require("../models/Grievance"));
 const sendMail_1 = __importDefault(require("../utils/sendMail"));
 const Users_1 = __importDefault(require("../models/Users"));
+const redisClient_1 = require("../redisClient");
 function getGrievancesController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -68,6 +69,7 @@ function changeGrievanceStatusController(req, res) {
             }
             const { regNo } = response;
             if (regNo) {
+                yield redisClient_1.redisClient.del(regNo);
                 const userData = yield Users_1.default.findOne({ regNo }).select("email");
                 if (!userData) {
                     (0, view_1.notFound)(res);

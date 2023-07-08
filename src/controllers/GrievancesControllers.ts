@@ -5,6 +5,7 @@ import { getAdminGrievancesController } from './adminControllers/GrievancesContr
 import GrievanceModel from '../models/Grievance';
 import sendMail from '../utils/sendMail';
 import UserModel from '../models/Users';
+import { redisClient } from '../redisClient';
 
 
 export async function getGrievancesController(req: Request, res: Response) {
@@ -52,6 +53,7 @@ export async function changeGrievanceStatusController(req: Request, res: Respons
         }
         const { regNo } = response;
         if (regNo) {
+            await redisClient.del(regNo);
             const userData = await UserModel.findOne({ regNo }).select("email");
             if (!userData) {
                 notFound(res);
