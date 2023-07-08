@@ -33,6 +33,10 @@ export async function registerAdminController(req: Request, res: Response) {
 export async function deleteAdminController(req: Request, res: Response) {
     try {
         const empNo = req.params.no.toUpperCase();
+        if (!empNo || empNo === res.locals.empNo || empNo === "000001") {
+            badRequest(res);
+            return;
+        }
         const response = await AdminModel.deleteOne({ empNo });
         console.log(response);
         if (response.deletedCount === 0) {

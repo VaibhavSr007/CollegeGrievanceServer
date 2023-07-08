@@ -48,6 +48,10 @@ function deleteAdminController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const empNo = req.params.no.toUpperCase();
+            if (!empNo || empNo === res.locals.empNo || empNo === "000001") {
+                (0, view_1.badRequest)(res);
+                return;
+            }
             const response = yield Admins_1.default.deleteOne({ empNo });
             console.log(response);
             if (response.deletedCount === 0) {
