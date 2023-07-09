@@ -18,6 +18,7 @@ const bcryptjs_1 = require("bcryptjs");
 const Admins_1 = __importDefault(require("../../models/Admins"));
 const hash_1 = require("../../utils/hash");
 const sendOTP_1 = __importDefault(require("../../utils/sendOTP"));
+const redisClient_1 = require("../../redisClient");
 function changeAdminPasswordController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -49,18 +50,28 @@ function sendAdminOTPController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const empNo = req.params.no;
-            const empData = yield Admins_1.default.findOne({ empNo }).select("email");
-            if (!empData) {
+            if (!empNo) {
+                (0, view_1.badRequest)(res);
+                return;
+            }
+            const isOtpExists = yield redisClient_1.redisClient.exists(empNo + 'otp');
+            if (isOtpExists) {
+                (0, view_1.statusOkay)(res, { message: "OTP Already Sent" });
+                return;
+            }
+            const regData = yield Admins_1.default.findOne({ empNo });
+            if (!regData) {
                 (0, view_1.notFound)(res);
                 return;
             }
-            const { email } = empData;
+            const { email } = regData;
             if (!email) {
                 (0, view_1.notFound)(res);
                 return;
             }
-            const otp = (0, hash_1.encrypt)(String(yield (0, sendOTP_1.default)(email)));
-            (0, view_1.statusOkay)(res, { otp });
+            const otp = yield (0, sendOTP_1.default)(email);
+            yield redisClient_1.redisClient.setEx(empNo + 'otp', 5 * 60, otp + '');
+            (0, view_1.statusOkay)(res, { message: "OTP Sent Successfully" });
         }
         catch (err) {
             (0, view_1.serverError)(res, err);

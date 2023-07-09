@@ -4,6 +4,7 @@ import { compare } from 'bcryptjs';
 import AdminModel from '../../models/Admins';
 import { encrypt } from '../../utils/hash';
 import sendOTP from '../../utils/sendOTP';
+import { redisClient } from '../../redisClient';
 
 
 export async function changeAdminPasswordController(req: Request, res: Response) {
@@ -34,19 +35,29 @@ export async function changeAdminPasswordController(req: Request, res: Response)
 export async function sendAdminOTPController(req: Request, res: Response) {
     try {
         const empNo = req.params.no;
-        const empData = await AdminModel.findOne({ empNo }).select("email");
-        if (!empData) {
+        if (!empNo) {
+            badRequest(res);
+            return;
+        }
+        const isOtpExists = await redisClient.exists(empNo + 'otp');
+        if (isOtpExists) {
+            statusOkay(res, { message: "OTP Already Sent" });
+            return;
+        }
+        const regData = await AdminModel.findOne({ empNo });
+        if (!regData) {
             notFound(res);
             return;
         }
-        const { email } = empData;
+        const { email } = regData;
         if (!email) {
             notFound(res);
             return;
         }
-        const otp = encrypt(String(await sendOTP(email)));
-        statusOkay(res, { otp });
-    } catch(err) {
+        const otp = await sendOTP(email);
+        await redisClient.setEx(empNo + 'otp', 5 * 60, otp + '');
+        statusOkay(res, { message: "OTP Sent Successfully" });
+    } catch(err) {  
         serverError(res, err);
     }
 }
