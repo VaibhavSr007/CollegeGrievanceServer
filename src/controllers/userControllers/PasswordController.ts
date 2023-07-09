@@ -4,6 +4,7 @@ import UserModel from '../../models/Users';
 import { encrypt } from '../../utils/hash';
 import { badRequest, serverError, wrongCredentials, statusOkay, notFound } from '../../views/view';
 import sendOTP from '../../utils/sendOTP';
+import { redisClient } from '../../redisClient';
 
 
 export async function changeUserPasswordController(req: Request, res: Response) {
@@ -34,6 +35,15 @@ export async function changeUserPasswordController(req: Request, res: Response) 
 export async function sendUserOTPController(req: Request, res: Response) {
     try {
         const regNo = req.params.no;
+        if (!regNo) {
+            badRequest(res);
+            return;
+        }
+        const isOtpExists = await redisClient.exists(regNo + 'otp');
+        if (isOtpExists) {
+            statusOkay(res, { message: "OTP Already Sent" });
+            return;
+        }
         const regData = await UserModel.findOne({ regNo });
         if (!regData) {
             notFound(res);
@@ -45,8 +55,9 @@ export async function sendUserOTPController(req: Request, res: Response) {
             return;
         }
         const otp = await sendOTP(email);
-        statusOkay(res, { otp });
-    } catch(err) {
+        await redisClient.setEx(regNo + 'otp', 5 * 60, otp + '');
+        statusOkay(res, { message: "OTP Sent Successfully" });
+    } catch(err) {  
         serverError(res, err);
     }
 }

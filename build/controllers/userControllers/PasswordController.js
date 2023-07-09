@@ -18,6 +18,7 @@ const Users_1 = __importDefault(require("../../models/Users"));
 const hash_1 = require("../../utils/hash");
 const view_1 = require("../../views/view");
 const sendOTP_1 = __importDefault(require("../../utils/sendOTP"));
+const redisClient_1 = require("../../redisClient");
 function changeUserPasswordController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -49,6 +50,15 @@ function sendUserOTPController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const regNo = req.params.no;
+            if (!regNo) {
+                (0, view_1.badRequest)(res);
+                return;
+            }
+            const isOtpExists = yield redisClient_1.redisClient.exists(regNo + 'otp');
+            if (isOtpExists) {
+                (0, view_1.statusOkay)(res, { message: "OTP Already Sent" });
+                return;
+            }
             const regData = yield Users_1.default.findOne({ regNo });
             if (!regData) {
                 (0, view_1.notFound)(res);
@@ -60,7 +70,8 @@ function sendUserOTPController(req, res) {
                 return;
             }
             const otp = yield (0, sendOTP_1.default)(email);
-            (0, view_1.statusOkay)(res, { otp });
+            yield redisClient_1.redisClient.setEx(regNo + 'otp', 5 * 60, otp + '');
+            (0, view_1.statusOkay)(res, { message: "OTP Sent Successfully" });
         }
         catch (err) {
             (0, view_1.serverError)(res, err);

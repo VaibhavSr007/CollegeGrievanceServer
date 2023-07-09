@@ -8,11 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendOTPController = exports.changePasswordController = void 0;
+exports.checkOTPController = exports.sendOTPController = exports.changePasswordController = void 0;
 const view_1 = require("../views/view");
 const PasswordControllers_1 = require("./adminControllers/PasswordControllers");
 const PasswordController_1 = require("./userControllers/PasswordController");
+const redisClient_1 = require("../redisClient");
+const Users_1 = __importDefault(require("../models/Users"));
+const Admins_1 = __importDefault(require("../models/Admins"));
+const hash_1 = require("../utils/hash");
 function changePasswordController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -51,3 +58,34 @@ function sendOTPController(req, res) {
     });
 }
 exports.sendOTPController = sendOTPController;
+function checkOTPController(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { otp, userNum, newPass } = req.body;
+            if (!otp || !userNum) {
+                (0, view_1.badRequest)(res);
+                return;
+            }
+            const realOTP = yield redisClient_1.redisClient.get(userNum + 'otp');
+            if (!realOTP) {
+                (0, view_1.notFound)(res);
+                return;
+            }
+            if (otp === realOTP) {
+                const pass = yield (0, hash_1.encrypt)(newPass);
+                yield redisClient_1.redisClient.del(userNum + 'otp');
+                if (userNum.toLowerCase() === userNum.toUpperCase())
+                    yield Admins_1.default.updateOne({ empNo: userNum }, { $set: { pass } });
+                else
+                    yield Users_1.default.updateOne({ regNo: userNum }, { $set: { pass } });
+                (0, view_1.statusOkay)(res, { message: "Password Changed Successfully" });
+            }
+            else
+                (0, view_1.wrongCredentials)(res);
+        }
+        catch (err) {
+            (0, view_1.serverError)(res, err);
+        }
+    });
+}
+exports.checkOTPController = checkOTPController;

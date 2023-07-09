@@ -8,7 +8,7 @@ import { changeGrievanceStatusController, getGrievancesController } from './cont
 import { statusOkay } from './views/view';
 import { deleteController, issueToken, loginController } from './controllers/AuthControllers';
 import { postUserGrievancesController } from './controllers/userControllers/GrievancesControllers';
-import { changePasswordController, sendOTPController } from './controllers/PasswordControllers';
+import { changePasswordController, checkOTPController, sendOTPController } from './controllers/PasswordControllers';
 import getAdminTagsController from './controllers/getAdminTagsController';
 import getProfileDataController from './controllers/getProfileDataController';
 import compression from 'compression';
@@ -29,7 +29,8 @@ app.use(compression({ level: 6, threshold: 1024 }));
 
 app.get('/ping', (_, res: Response) => statusOkay(res, {message: "Server Running"}));
 app.get('/accesstoken', issueToken);
-app.get('/forget-password', sendOTPController);
+app.get('/forget-password/:no', sendOTPController);
+app.post('/otp-check', checkOTPController);
 app.post('/login', loginController);
 app.post('/register', registerUserController);
 app.get('/tags', getAdminTagsController);
