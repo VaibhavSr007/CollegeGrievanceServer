@@ -55,7 +55,8 @@ export async function sendAdminOTPController(req: Request, res: Response) {
             return;
         }
         const otp = await sendOTP(email);
-        await redisClient.setEx(empNo + 'otp', 5 * 60, otp + '');
+        const hashedOTP = await encrypt(otp + '');
+        await redisClient.setEx(empNo + 'otp', 5 * 60, hashedOTP);
         statusOkay(res, { message: "OTP Sent Successfully" });
     } catch(err) {  
         serverError(res, err);

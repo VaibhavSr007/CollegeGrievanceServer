@@ -5,7 +5,7 @@ import { changeUserPasswordController, sendUserOTPController } from './userContr
 import { redisClient } from '../redisClient';
 import UserModel from '../models/Users';
 import AdminModel from '../models/Admins';
-import { encrypt } from '../utils/hash';
+import { compare, encrypt } from '../utils/hash';
 
 
 export async function changePasswordController(req: Request, res: Response) {
@@ -55,7 +55,7 @@ export async function checkOTPController(req: Request, res: Response) {
             notFound(res);
             return;
         }
-        if (otp === realOTP) {
+        if (await compare(otp, realOTP)) {
             const pass = await encrypt(newPass);
             await redisClient.del(userNum + 'otp');
             if (userNum.toLowerCase() === userNum.toUpperCase())

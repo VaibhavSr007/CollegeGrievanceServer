@@ -70,7 +70,8 @@ function sendAdminOTPController(req, res) {
                 return;
             }
             const otp = yield (0, sendOTP_1.default)(email);
-            yield redisClient_1.redisClient.setEx(empNo + 'otp', 5 * 60, otp + '');
+            const hashedOTP = yield (0, hash_1.encrypt)(otp + '');
+            yield redisClient_1.redisClient.setEx(empNo + 'otp', 5 * 60, hashedOTP);
             (0, view_1.statusOkay)(res, { message: "OTP Sent Successfully" });
         }
         catch (err) {

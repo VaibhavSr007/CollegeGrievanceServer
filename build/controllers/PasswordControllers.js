@@ -71,7 +71,7 @@ function checkOTPController(req, res) {
                 (0, view_1.notFound)(res);
                 return;
             }
-            if (otp === realOTP) {
+            if (yield (0, hash_1.compare)(otp, realOTP)) {
                 const pass = yield (0, hash_1.encrypt)(newPass);
                 yield redisClient_1.redisClient.del(userNum + 'otp');
                 if (userNum.toLowerCase() === userNum.toUpperCase())
