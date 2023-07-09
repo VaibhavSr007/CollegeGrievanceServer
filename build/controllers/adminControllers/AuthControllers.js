@@ -53,7 +53,6 @@ function deleteAdminController(req, res) {
                 return;
             }
             const response = yield Admins_1.default.deleteOne({ empNo });
-            console.log(response);
             if (response.deletedCount === 0) {
                 (0, view_1.wrongCredentials)(res);
                 return;

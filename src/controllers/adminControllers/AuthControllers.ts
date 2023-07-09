@@ -38,7 +38,6 @@ export async function deleteAdminController(req: Request, res: Response) {
             return;
         }
         const response = await AdminModel.deleteOne({ empNo });
-        console.log(response);
         if (response.deletedCount === 0) {
             wrongCredentials(res);
             return;
